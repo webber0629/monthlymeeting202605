@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXT-GEN iGAMING · 五月產品觀察與未來路徑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@400;500;600;700;800;900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+TC:wght@300;400;500;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ============ 主題色: 🖋 墨水經典 (Editorial Monocle) ============ */
+    --ink:#0a0a0b;
+    --ink-rgb:10,10,11;
+    --paper:#f1efea;
+    --paper-rgb:241,239,234;
+    --paper-tint:#e8e5de;
+    --ink-tint:#18181a;
+    --accent: #c96442;
+
+    /* ============ 字體 ============ */
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif TC",serif;
+    --sans-zh:"Noto Sans TC",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+
+  #deck{position:fixed;inset:0;width:600vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:4vh 6vw 4vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink)}
+  .slide.dark{color:var(--paper)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:15px}
+
+  .kicker{font-family:var(--mono);font-size:14px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:1vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:10vw;line-height:.96;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:6.2vw;line-height:1.08;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3.2vw;line-height:1.25;letter-spacing:0;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.5vw;line-height:1.3}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:2vw;line-height:1.45;opacity:.86}
+
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 2vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 2vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 2vh;align-items:start}
+
+  .callout{padding:1.5vh 1.5vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(14px,1.15vw);line-height:1.45;opacity:0.95}
+  .callout .cite{display:block;margin-top:1vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(15px,1.4vw);line-height:1.3}
+
+  .frame-img{overflow:hidden;position:relative;background:rgba(0,0,0,.04);box-sizing:border-box;width:100%;border-radius:4px;border:1px solid rgba(127,127,127,0.2)}
+  .slide.dark .frame-img{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+  .frame-img img, .frame-img video, .frame-img iframe{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;border:none}
+  
+  /* 排行榜與內容專用：contain 以完整顯示不裁切 */
+  .contain-img .frame-img{background:transparent;border:none;overflow:visible}
+  .contain-img .frame-img img{object-fit:contain}
+  
+  .img-cap{display:block;margin-top:.4vh;font-family:var(--mono);font-size:max(10px,.8vw);letter-spacing:.22em;text-transform:uppercase;opacity:.6}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,0.18);backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:all 0.3s ease;border:0}
+  #nav .dot.active{background:rgba(255,255,255,0.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,0.25)}
+  body.light-bg #nav .dot{background:rgba(10,10,11,0.25)}
+  body.light-bg #nav .dot.active{background:rgba(10,10,11,0.9)}
+
+  .ico-lg{width:2.6vw;height:2.6vw;stroke-width:1.2;display:inline-block;stroke:currentColor;fill:none}
+</style>
+</head>
+<body>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+
+<div id="deck">
+
+<!-- Slide 1: Cover -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div class="left">Monthly Review · 2026.05</div>
+    <div class="right">NEXT-GEN</div>
+  </div>
+  <div class="frame" style="display:grid; gap:3vh; align-content:center; min-height:82vh">
+    <div class="kicker">Future Path · 未來路徑</div>
+    <h1 class="h-hero">NEXT-GEN iGAMING</h1>
+    <h2 class="h-sub">五月產品觀察與預告</h2>
+    <p class="lead" style="max-width:60vw">
+      揭露市場頂尖產品資訊，預見我們的下一代技術演進。
+    </p>
+    <div class="meta" style="margin-top:2vh; font-family:var(--mono); font-size:12px; opacity:0.6">iGaming Product Team · Internal Only</div>
+  </div>
+  <div class="foot">
+    <div class="title">五月月會分享 · 產品預告</div>
+    <div>— 2026 —</div>
+  </div>
+</section>
+
+<!-- Slide 2: Cannon System -->
+<section class="slide dark">
+  <div class="chrome">
+    <div class="left">Battery System · 砲台系統</div>
+    <div class="right">02 / 06</div>
+  </div>
+  <div class="frame grid-2-7-5" style="padding-top:1.5vh">
+    <div style="display:flex; flex-direction:column; justify-content:space-between; min-height:60vh">
+      <div>
+        <div class="kicker">Monetization · 商業化</div>
+        <h2 class="h-xl">砲台 Skin：<br>優越感的代碼。</h2>
+        <p class="lead" style="margin-top:1vh">
+          不只是外觀，更是社交地位的象徵。
+        </p>
+        <div style="margin-top:2vh; font-family:var(--sans-zh); font-size:1.4vw; line-height:1.5; opacity:0.8">
+          <ul style="padding-left:1.2em">
+            <li><strong>獲取：</strong> 任務活動或付費購買。</li>
+            <li><strong>心理：</strong> 獨佔帶來「高人一等」的優越感。</li>
+            <li><strong>習慣：</strong> 符合目標市場玩家的付費與社交直覺。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:1.5vh">
+        <div class="q-big">"稀有 Skin 是玩家在社群中展示實力的最強語言。"</div>
+        <span class="cite">— 市場觀察筆記</span>
+      </div>
+    </div>
+    <div class="col" style="gap:1vh">
+      <figure class="frame-img" style="aspect-ratio:1435/650; max-height:50vh">
+        <img src="morwucvu-7102_UI_Cannon_Change_Reference.png" alt="砲台系統 UI 參考">
+      </figure>
+      <figcaption class="img-cap">Cannon Skins · 交互展示與活動機制</figcaption>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">產品設計 · 心理溢價與付費動力</div>
+    <div>Act II · Systems</div>
+  </div>
+</section>
+
+<!-- Slide 3: Leaderboard Deep Dive -->
+<section class="slide light">
+  <div class="chrome">
+    <div class="left">Social System · 排行榜</div>
+    <div class="right">03 / 06</div>
+  </div>
+  <div class="frame grid-2-6-6" style="padding-top:1.5vh">
+    <div style="display:flex; flex-direction:column; justify-content:space-between; min-height:60vh">
+      <div>
+        <div class="kicker">Strategic Design · 心理動能</div>
+        <h2 class="h-xl" style="margin-bottom:1vh">巔峰榜：<br>榮譽與追趕。</h2>
+        <p class="lead" style="margin-bottom:1.5vh">
+          透過雙榜機制，建立長期動能。
+        </p>
+        <div style="font-family:var(--sans-zh); font-size:max(13px,1.35vw); line-height:1.5; opacity:.85">
+          <p style="font-weight:700; margin-bottom:0.4vh; color:var(--accent)">昨日排行的業務價值：</p>
+          <ul style="padding-left:1.2em; margin-bottom:2vh">
+            <li><strong>成就驗證：</strong> 結算發獎的公信力依據。</li>
+            <li><strong>追趕動能：</strong> 觀察昨日門檻，轉化為今日動力。</li>
+          </ul>
+          <p style="font-weight:700; margin-bottom:0.4vh">功能規劃：</p>
+          <ul style="padding-left:1.2em; font-size:0.9em">
+            <li><strong>多維榜單：</strong> 金幣、倍率、個人三位一體。</li>
+            <li><strong>視覺特權：</strong> 前三名動態光效，強化競爭力。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="contain-img" style="display:grid; grid-template-rows:1fr 1fr; gap:0.5vh">
+      <figure class="frame-img">
+        <img src="morwsj08-7102_UI_Leaderboard_Ref_01.png" alt="巔峰榜主介面" style="height:33vh">
+      </figure>
+      <figure class="frame-img">
+        <img src="morwyidk-7102_UI_Leaderboard_Ref_02.png" alt="巔峰榜分頁介面" style="height:33vh">
+      </figure>
+      <figcaption class="img-cap">Leaderboard · 完整排行資訊呈現</figcaption>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">社交系統 · 成就感驗證與持續性動能</div>
+    <div>Page 03</div>
+  </div>
+</section>
+
+<!-- Slide 4: Scratch Card System -->
+<section class="slide light">
+  <div class="chrome">
+    <div class="left">Systems · 玩法體系</div>
+    <div class="right">04 / 06</div>
+  </div>
+  <div class="frame grid-2-7-5" style="padding-top:1.5vh">
+    <div style="display:flex; flex-direction:column; justify-content:space-between; min-height:65vh">
+      <div>
+        <div class="kicker">Core System · 核心玩法</div>
+        <h2 class="h-xl" style="margin-bottom:1vh">刮刮卡系統。</h2>
+        <p class="lead" style="margin-bottom:2vh">
+          通用玩法體系，實現極致的模組化擴展。
+        </p>
+        <div style="font-family:var(--sans-zh); font-size:max(13px,1.4vw); line-height:1.6; opacity:.82">
+          <ul style="padding-left:1.2em; margin-bottom:2vh">
+            <li><strong>統一交互：</strong> 跨產品打擊物件即可觸發刮刮卡玩法。</li>
+            <li><strong>IP 換皮力：</strong> 支持如<strong>中秋節、萬聖節、黑悟空</strong>等快速視覺更換。</li>
+            <li><strong>Super Buy：</strong> 支持商業化直連，玩家可購買刮刮卡，提升付費頻次。</li>
+          </ul>
+        </div>
+        <div class="callout" style="margin-top:2vh; border-color:var(--accent); background:rgba(var(--ink-rgb), 0.03)">
+          <div class="q-big">"系統化讓玩法永不過時，換皮能力讓內容永遠新鮮。"</div>
+        </div>
+      </div>
+    </div>
+    <div class="contain-img" style="display:flex; flex-direction:column; gap:1.5vh">
+      <figure class="frame-img" style="height:18vh">
+        <img src="morx78tx-7102_Panda_Mahjong_Ref.png" alt="刮刮卡熊貓物件參考" style="height:18vh">
+      </figure>
+      <figure class="frame-img" style="height:32vh">
+        <img src="morz0axu-image.png" alt="多主題刮刮卡示意圖" style="height:32vh">
+      </figure>
+      <figcaption class="img-cap">Scratch Card · 熊貓 IP 與多主題示意</figcaption>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">產品觀察 · 模組化玩法與 IP 生態佈局</div>
+    <div>Page 04</div>
+  </div>
+</section>
+
+<!-- Slide 5: New Boss Benchmark -->
+<section class="slide dark">
+  <div class="chrome">
+    <div class="left">Benchmark · 市場標竿</div>
+    <div class="right">05 / 06</div>
+  </div>
+  <div class="frame grid-2-6-6" style="padding-top:1.5vh">
+    <div style="display:flex; flex-direction:column; justify-content:center; min-height:60vh">
+      <div>
+        <div class="kicker">Market Case Study</div>
+        <h2 class="h-xl" style="line-height:1.2; margin-bottom:2vh">新 BOSS 分享</h2>
+        <p class="lead" style="font-family:var(--serif-zh); font-weight:600; font-size:4vw; line-height:1.5; color:var(--paper)">
+          鯤噬天下<br>
+          兔女郎
+        </p>
+      </div>
+    </div>
+    <div class="contain-img" style="display:grid; grid-template-rows:1fr 1fr; gap:1.5vh">
+      <figure class="frame-img" style="height:32vh">
+        <img src="mos0m2v8-image.png" alt="鯤噬天下" style="height:32vh; object-fit:contain">
+      </figure>
+      <figure class="frame-img" style="height:32vh">
+        <img src="mos0lzc2-image.png" alt="兔女郎" style="height:32vh; object-fit:contain">
+      </figure>
+      <figcaption class="img-cap">New Boss · 市場標竿產品揭露</figcaption>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">標竿產品分析 · 美術張力與設計</div>
+    <div>Page 05</div>
+  </div>
+</section>
+
+<!-- Slide 6: Vision -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div class="left">Vision · 願景</div>
+    <div class="right">06 / 06</div>
+  </div>
+  <div class="frame" style="display:grid; gap:3vh; align-content:center; min-height:82vh">
+    <div class="kicker">The Vision · 2026</div>
+    <h1 class="h-hero">從遊戲，<br>到生態。</h1>
+    <h2 class="h-sub" style="max-width:65vw">我們不只是在做單一魚機，而是建構一個大平台，讓客戶與玩家深陷其中，無法離開。</h2>
+    <div class="meta" style="margin-top:4vh; font-family:var(--mono); font-size:12px; opacity:0.6">iGaming Platform Evolution · 2026.05.05</div>
+  </div>
+  <div class="foot">
+    <div class="title">從內容供應供應商到平台生態系的躍遷</div>
+    <div>— Future —</div>
+  </div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+const FS_DARK = `precision highp float;uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;float md=length(p-m);float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;vec2 p0=p;for(float i=1.0;i<4.0;i++){p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;}float r=length(p);float ang=atan(p.y,p.x);vec3 a=vec3(0.12,0.12,0.13);vec3 b=vec3(0.03,0.04,0.05);vec3 c=vec3(1.0,1.0,1.0);vec3 d=vec3(0.1,0.2,0.4);vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;col+=vec3(disp*0.015,disp*0.01,disp*0.02);float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);col+=hi*0.08;vec3 base=vec3(0.05,0.05,0.06);col=mix(base,col,0.85);gl_FragColor=vec4(col,1.0);}`;
+const FS_LIGHT = `precision highp float;uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float noise(vec2 p){vec2 i=floor(p),f=fract(p);float a=hash(i),b=hash(i+vec2(1,0));float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));vec2 u=f*f*(3.0-2.0*f);return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;}float fbm(vec2 p){float v=0.0,a=0.5;mat2 m=mat2(0.80,0.60,-0.60,0.80);for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}return v;}void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;vec2 md=p-m;float dl=length(md);p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));float f=fbm(p*2.2+r*1.5);vec3 silverDark=vec3(0.86,0.85,0.84);vec3 paper=vec3(0.955,0.945,0.925);vec3 col=mix(silverDark,paper,f);float ph=r.x*2.2+u_time*0.35;col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;float hl=smoothstep(0.48,0.92,f);col+=hl*0.06;gl_FragColor=vec4(col,1.0);}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+  };
+}
+const drawDark=bootGL('bg-dark',FS_DARK);
+const drawLight=bootGL('bg-light',FS_LIGHT);
+const t0=Date.now();
+(function loop(){
+  const t=(Date.now()-t0)/1000;
+  drawDark(t);drawLight(t);
+  requestAnimationFrame(loop);
+})();
+
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  slides.forEach((s,i)=>s.classList.toggle('active',i===idx));
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  document.body.classList.toggle('light-bg',el.classList.contains('light'));
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown')go(idx+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(idx-1);
+});
+
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
